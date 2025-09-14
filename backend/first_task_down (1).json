@@ -1,0 +1,1208 @@
+{
+  "name": "first_task_down",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "content1",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        432
+      ],
+      "id": "78a9c404-b4e0-4254-8c8b-e27baad766b0",
+      "name": "Webhook",
+      "webhookId": "f4dd7e43-c9ea-4cca-ba1a-7e849cf26384"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"chatInput\": {\n    \"config\":{{ $json.body.config }} ,\n    \"ideas\": {{ $json.body.ideas }}\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        432
+      ],
+      "id": "afed5055-01b9-4567-ab2a-b297b0697798",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}\n\n{{ $('Edit Fields').item.json.chatInput }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are Stage 4 – Editorial Rater in an n8n content pipeline.\nYou receive:\n\narticle_text (string): the full self-media article produced upstream (first line is the headline, then the body).\n\nconfig (JSON): brand basics and tone guardrails (voice, do/don’t).\n\nidea (JSON): title, thesis, key_messages, outline, SEO keywords (primary/secondary), goal, CTA.\n\nTask: Evaluate how likely the article is to drive clicks, saves, and shares without hype and while staying on-brand. Score from 0–100 using the rubric below.\n\nRubric (score internally)\n\nHeadline effectiveness (15)\n\nSpecific, outcome-oriented, uses numbers/contrast/tension; ≤ 65 characters; accurately reflects content; integrates the primary SEO term if natural.\n\nHook & emotional activation (15)\n\nFirst 1–2 sentences spark curiosity/urgency with a concrete stat/stakes; evokes high-arousal but credible feelings (awe/concern), not clickbait.\n\nScannability & structure (15)\n\nShort paragraphs (≤ 2 lines), meaningful subheads, bullets/steps, bolded key phrases; clear flow (prefer PAS or AIDA end-to-end).\n\nEvidence & accuracy (20)\n\nKey claims trace to research_report (if provided) or are conservative; no fabrication; includes trade-offs/limits where relevant.\n\nValue & specificity (10)\n\nConcrete how-to steps, metrics, mini-examples or before/after; practical utility.\n\nBrand tone & compliance (10)\n\nMatches config.brand_tone (voice + do/don’t); avoids marketese or competitor-bashing.\n\nSEO integration (10)\n\nNatural presence of idea.seo.primary and relevant secondary terms in headline/lead/body; no keyword stuffing.\n\nCTA clarity (5)\n\nOne specific, goal-aligned call to action at the end.\n\nPenalties (apply deductions before finalizing the 0–100 score):\n\nHeadline missing or > 65 chars (−5 to −10).\n\nNo CTA (−5).\n\nHype/marketese, unverifiable claims, or mismatch with brand rules (−5 to −15).\n\nOff-topic vs. idea.thesis (−10 to −20).\n\nLanguage: Use the same language as article_text.\nIf inputs are grossly insufficient or the article is off-topic → return a conservative low score.\n\nOutput (strict)\n\nReturn only a valid JSON object with exactly three top-level fields:\n\nscore: integer 0–100 (final weighted result).\n\nrationale: a concise explanation (≤ 120 words) summarizing why the score was assigned, explicitly referencing the rubric dimensions (headline, hook/emotion, structure/scannability, evidence/accuracy, value/specificity, brand tone/compliance, SEO, CTA).\n\nimprovements: an array of 3–6 concrete, actionable fixes.\nEach item must be an object with:\n\narea: one of \"headline\" | \"hook\" | \"structure\" | \"evidence\" | \"specificity\" | \"brand_tone\" | \"seo\" | \"cta\".\n\nfix: the specific change to make (imperative, testable).\n\nexample: a one-line rewritten snippet (≤ 120 chars) illustrating the fix.\n\nLanguage: Same as article_text.\nNo extra text, no code fences, no trailing commas.\n\nExample shape (not a template to copy verbatim):\n\n{\n  \"score\": 87,\n  \"rationale\": \"Headline is specific and ≤65 chars; strong hook with a concrete stat; clear PAS flow and bullets. Evidence aligns with report; minor gaps in risks section; SEO terms present but could be earlier in lead; CTA is clear.\",\n  \"improvements\": [\n    {\n      \"area\": \"headline\",\n      \"fix\": \"Tighten to ≤60 chars and front-load the primary SEO term.\",\n      \"example\": \"LLM Cost Optimization: Cut Spend 30–40% Without Quality Loss\"\n    },\n    {\n      \"area\": \"hook\",\n      \"fix\": \"Open with a sharper tension using a quantified before/after.\",\n      \"example\": \"Last quarter’s LLM bill rose 38%—here’s how teams cut it in weeks.\"\n    },\n    {\n      \"area\": \"evidence\",\n      \"fix\": \"Add one sourced benchmark and a brief limits paragraph.\",\n      \"example\": \"vLLM + caching trimmed p95 latency 22% (source); limits: cold starts.\"\n    },\n    {\n      \"area\": \"seo\",\n      \"fix\": \"Include the primary keyword in the lead’s first sentence.\",\n      \"example\": \"LLM cost optimization starts with routing the smallest effective model.\"\n    }\n  ]\n}\n\n\nNo extra text, no trailing commas, no code fences.\n\nthe article may have no the word of Hook\",\"CAT\",this is ok,you just need to check if the article have the sencetence about that"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        992,
+        304
+      ],
+      "id": "7666f052-e3b1-41f3-a009-7215f0cd59ef",
+      "name": "Basic LLM Chain1",
+      "executeOnce": true,
+      "retryOnFail": true,
+      "maxTries": 5,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3-30b-a3b-instruct-2507",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        992,
+        528
+      ],
+      "id": "33ecb81d-6b33-4178-9431-d895f2dd771d",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Y27hkJQbBkswsWZh",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3fc84187-6c78-478d-9fb7-968a121e2bf8",
+              "leftValue": "={{ $json.output.score }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        432
+      ],
+      "id": "a15074bb-9535-4097-81fb-c51cee9de426",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"score\": 87,\n  \"rationale\": \"Headline is specific and ≤65 chars; strong hook with a concrete stat; clear PAS flow and bullets. Evidence aligns with report; minor gaps in risks section; SEO terms present but could be earlier in lead; CTA is clear.\",\n  \"improvements\": [\n    {\n      \"area\": \"headline\",\n      \"fix\": \"Tighten to ≤60 chars and front-load the primary SEO term.\",\n      \"example\": \"LLM Cost Optimization: Cut Spend 30–40% Without Quality Loss\"\n    },\n    {\n      \"area\": \"hook\",\n      \"fix\": \"Open with a sharper tension using a quantified before/after.\",\n      \"example\": \"Last quarter’s LLM bill rose 38%—here’s how teams cut it in weeks.\"\n    },\n    {\n      \"area\": \"evidence\",\n      \"fix\": \"Add one sourced benchmark and a brief limits paragraph.\",\n      \"example\": \"vLLM + caching trimmed p95 latency 22% (source); limits: cold starts.\"\n    },\n    {\n      \"area\": \"seo\",\n      \"fix\": \"Include the primary keyword in the lead’s first sentence.\",\n      \"example\": \"LLM cost optimization starts with routing the smallest effective model.\"\n    }\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1136,
+        528
+      ],
+      "id": "a8411f93-fd0f-47b1-859e-c41e03c103e4",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.markdown }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        3840,
+        528
+      ],
+      "id": "9ce9da54-1e5a-4a9b-a901-71e6e19fd1a2",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $node[\"AI Agent\"].json.output }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are Image Prompt Planner in a content pipeline.\nGoal: From an input self-media article (title + body), produce 3–4 distinct image generation prompts that precisely match the article’s key ideas.\n\nLanguage: Write prompts in concise, vivid English.\nAspect ratio: Every prompt must explicitly include “vertical 9:16” (or “aspect ratio 9:16”).\nSafety/legality: No brand logos, trademarks, or identifiable celebrities. Use generic people only when needed. No text overlays, watermarks, or UI mockups unless the article explicitly requires them.\n\nPrompt quality requirements (apply to EACH prompt):\n\nClearly state the main subject and action.\n\nSpecify setting/environment, time of day/season, and meaningful background elements.\n\nDefine composition (framing, camera angle, distance, focal length), lighting, color palette, mood, and style (e.g., photorealistic, cinematic, documentary, minimalist vector, watercolor).\n\nAdd detail adjectives that are concrete, not buzzwords.\n\nAvoid meta language like “an image of…”, “a photo that says…”.\n\nVariety rules:\n\nPrompts must not duplicate each other.\n\nCover different visual angles or scenes (e.g., hero scene, process/diagrammatic scene, close-up/details, human moment or setting shot).\n\nIf the article is abstract, use strong metaphors tied to its nouns/verbs.\n\nInput: article_text (string; first line is title, then body).\nOutput: Return only a JSON object with 3–4 fields named exactly:\n\"image_prompt1\", \"image_prompt2\", \"image_prompt3\", \"image_prompt4\" (omit \"image_prompt4\" if only 3).\nNo extra keys, no markdown, no trailing commas.\n\nFormat example (structure only):\n\n{\n  \"image_prompt1\": \"<prompt 1, includes: subject, setting, composition, lighting, mood, style, vertical 9:16>\",\n  \"image_prompt2\": \"<prompt 2 ... vertical 9:16>\",\n  \"image_prompt3\": \"<prompt 3 ... vertical 9:16>\",\n  \"image_prompt4\": \"<prompt 4 ... vertical 9:16>\"\n}\n\n\nNow generate the JSON"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1568,
+        432
+      ],
+      "id": "4086abd5-5594-4d33-9248-a57dd58b5c8d",
+      "name": "Basic LLM Chain2",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3-30b-a3b-instruct-2507",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        656
+      ],
+      "id": "01c41f49-d809-4ea4-b874-5e1950c0ebc7",
+      "name": "OpenRouter Chat Model2",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Y27hkJQbBkswsWZh",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"image_prompt1\": \"<prompt 1, includes: subject, setting, composition, lighting, mood, style, vertical 9:16>\",\n  \"image_prompt2\": \"<prompt 2 ... vertical 9:16>\",\n  \"image_prompt3\": \"<prompt 3 ... vertical 9:16>\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1712,
+        656
+      ],
+      "id": "f4a42262-e19f-486e-aeb1-e95ea5d9c0de",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2592,
+        512
+      ],
+      "id": "a949203e-f907-4768-acb8-8596b6dc58d1",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openRouterApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"google/gemini-2.5-flash-image-preview\",\n  \"messages\": [\n    { \"role\": \"user\", \"content\": \"{{ $json.output.image_prompt1 }}\" }\n  ],\n  \"modalities\": [\"image\", \"text\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1920,
+        336
+      ],
+      "id": "9f192b73-54e6-4016-9692-40dcaf5eef6f",
+      "name": "HTTP Request",
+      "retryOnFail": false,
+      "credentials": {
+        "openRouterApi": {
+          "id": "Y27hkJQbBkswsWZh",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openRouterApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"google/gemini-2.5-flash-image-preview\",\n  \"messages\": [\n    { \"role\": \"user\", \"content\": \"{{ $json.output.image_prompt2 }}\" }\n  ],\n  \"modalities\": [\"image\", \"text\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1920,
+        528
+      ],
+      "id": "c9fcd3ff-1f06-45a1-a8c9-1d7e9ec958d1",
+      "name": "HTTP Request1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Y27hkJQbBkswsWZh",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openRouterApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"google/gemini-2.5-flash-image-preview\",\n  \"messages\": [\n    { \"role\": \"user\", \"content\": \"{{ $json.output.image_prompt3 }}\" }\n  ],\n  \"modalities\": [\"image\", \"text\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1920,
+        720
+      ],
+      "id": "23cc0e67-eb99-4c4b-ba8b-a92cfb97c8ac",
+      "name": "HTTP Request2",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Y27hkJQbBkswsWZh",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1396071-1d55-4dfd-a06e-45e3bff8e540",
+              "name": "data",
+              "value": "={{ $json.choices[0].message.images[0].image_url.url }}",
+              "type": "string"
+            },
+            {
+              "id": "c14d4ef2-ff46-485d-a21b-21b5ca077cea",
+              "name": "base",
+              "value": "={{ $json.choices[0].message.images[0].image_url.url.split(',')[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "d8f1cce3-6186-4820-b928-a88e018b068c",
+              "name": "mime",
+              "value": "={{ $json.choices[0].message.images[0].image_url.url.match(/^data:([^;]+)/)[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "0b7e6db9-6eb8-4620-be12-f4550d1d0f06",
+              "name": "fileName",
+              "value": ".png",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2144,
+        528
+      ],
+      "id": "3abd9527-5582-42da-88f5-0e7e1cd910c6",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1396071-1d55-4dfd-a06e-45e3bff8e540",
+              "name": "data",
+              "value": "={{ $json.choices[0].message.images[0].image_url.url }}",
+              "type": "string"
+            },
+            {
+              "id": "c14d4ef2-ff46-485d-a21b-21b5ca077cea",
+              "name": "base",
+              "value": "={{ $json.choices[0].message.images[0].image_url.url.split(',')[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "d8f1cce3-6186-4820-b928-a88e018b068c",
+              "name": "mime",
+              "value": "={{ $json.choices[0].message.images[0].image_url.url.match(/^data:([^;]+)/)[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "0b7e6db9-6eb8-4620-be12-f4550d1d0f06",
+              "name": "fileName",
+              "value": ".png",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2144,
+        336
+      ],
+      "id": "5bae1486-af04-46c7-9c0e-b3982b9562d0",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1396071-1d55-4dfd-a06e-45e3bff8e540",
+              "name": "data",
+              "value": "={{ $json.choices[0].message.images[0].image_url.url }}",
+              "type": "string"
+            },
+            {
+              "id": "c14d4ef2-ff46-485d-a21b-21b5ca077cea",
+              "name": "base",
+              "value": "={{ $json.choices[0].message.images[0].image_url.url.split(',')[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "d8f1cce3-6186-4820-b928-a88e018b068c",
+              "name": "mime",
+              "value": "={{ $json.choices[0].message.images[0].image_url.url.match(/^data:([^;]+)/)[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "0b7e6db9-6eb8-4620-be12-f4550d1d0f06",
+              "name": "fileName",
+              "value": ".png",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2144,
+        720
+      ],
+      "id": "3e7e62cc-7afa-40a3-a320-0205f84a0746",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "=base",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2368,
+        336
+      ],
+      "id": "6e52fe91-a524-4d81-ac63-c80b11534c1f",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "=base",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2368,
+        528
+      ],
+      "id": "c9508580-1832-499b-b07a-19da21f63af1",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "=base",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2368,
+        720
+      ],
+      "id": "4998c6ef-2ca3-4790-adfe-fa0f60ba2fa9",
+      "name": "Convert to File2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// JavaScript / Run once for all items\n\n// 取上游节点输出\nconst promptJson = $('Basic LLM Chain2').first().json || {};\nconst textJson   = $('AI Agent').first().json || {};\n\n// 小工具：从候选里挑第一个非空字符串\nconst firstNonEmpty = (arr) => {\n  for (const v of arr) if (typeof v === 'string' && v.trim()) return v.trim();\n  return '';\n};\n\n// —— 文章：第一行标题，其余为正文\nconst rawText = firstNonEmpty([textJson.text, textJson.article_text, textJson?.output]) || '';\nconst lines   = String(rawText).split(/\\r?\\n/);\nconst title   = (lines.shift() || '').trim();\nconst body    = lines.join('\\n').trim();\n\n// —— 图片 prompts：兼容顶层和 output.image_promptN\nconst out    = promptJson.output || {};\nconst p1     = firstNonEmpty([out.image_prompt1, promptJson.image_prompt1]);\nconst p2     = firstNonEmpty([out.image_prompt2, promptJson.image_prompt2]);\nconst p3     = firstNonEmpty([out.image_prompt3, promptJson.image_prompt3]);\n\n// —— 组装结果（不含二进制）→ 外层包一层 data\nconst result = {\n  article: { title, body },\n  image_content1: { placeholder: '{{img1}}', prompt: p1 || '' },\n  image_content2: { placeholder: '{{img2}}', prompt: p2 || '' },\n  image_content3: { placeholder: '{{img3}}', prompt: p3 || '' },\n  placeholders: []\n};\n\nreturn [{ json: { data: result } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2816,
+        528
+      ],
+      "id": "75620a35-79f5-40b2-9667-0d5baa6cb2dc",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are **Image-Aware Markdown Layout Composer**.\n\n**Goal**\nGiven one item with an `article` (title + body) and up to three `image_contentN` objects (each contains a `placeholder` such as `{{img1}}` and a `prompt`), produce a **mixed text–image article in Markdown** that **keeps the original wording exactly** and inserts **only the provided placeholders** at semantically strong positions. **Do not output or paraphrase any prompt text.** Return a small, machine-friendly JSON object for downstream replacement (e.g., Edit node swaps placeholders to real images).\n\n---\n\n### Inputs\n\nA single JSON object shaped like:\n\n```json\n{\n  \"article\": { \"title\": \"string\", \"body\": \"string\" },\n  \"image_content1\": { \"placeholder\": \"{{img1}}\", \"prompt\": \"string\" },\n  \"image_content2\": { \"placeholder\": \"{{img2}}\", \"prompt\": \"string\" },\n  \"image_content3\": { \"placeholder\": \"{{img3}}\", \"prompt\": \"string\" },\n  \"placeholders\": []\n}\n```\n\nNotes:\n\n* Use only placeholders whose associated `prompt` is non-empty.\n* Ignore `placeholders` if present; infer availability from `image_contentN.prompt`.\n\n---\n\n### Non-negotiable rules\n\n1. **No wording changes.** Do not add, remove, or rewrite any words from `article.title` or `article.body`. Your job is **layout only**.\n2. **Markdown only.** No HTML, no code fences, no YAML front-matter.\n3. **Placeholders only.** Insert `{{imgN}}` placeholders; **do not include prompt text**, alt text, captions, watermarks, or links.\n4. **Keep structure.**\n\n   * Title → `# <exact title>`\n   * Preserve existing headings inside `body` (e.g., lines starting with `###`) and paragraph breaks.\n   * Keep lists, emphasis, and existing Markdown as-is.\n5. **0–3 images supported.** If none are available, return text-only Markdown.\n\n---\n\n### Self-media layout guidance (for placement decisions only; again, do not change wording)\n\n* **Hook/Hero (img1)**: If available, insert the first placeholder **immediately after the H1 title** to visually anchor the hook.\n* **Process/Value (img2)**: If available, insert near the transition to solution/steps/framework (e.g., after a heading containing “Solution”, “Framework”, “Steps”, or the midpoint of the body if no such heading exists).\n* **Proof/Outcome/CTA (img3)**: If available, insert before or after the section showing results, case studies, proof, or the closing call-to-action.\n* If headings don’t exist, approximate these positions by paragraph semantics (problem → solution → proof/closing).\n* Never place two images back-to-back; always keep at least one paragraph between images.\n\n---\n\n### Output format (JSON)\n\nReturn **only** a JSON object with these keys:\n\n```json\n{\n  \"format\": \"markdown\",\n  \"used_placeholders\": [\"{{img1}}\",\"{{img2}}\"],\n  \"markdown\": \"# Title...\\n\\n{{img1}}\\n\\nParagraph...\\n\\n{{img2}}\\n\\n...\"\n}\n```\n\n* `format` must be `\"markdown\"`.\n* `used_placeholders` lists the placeholders actually inserted, in document order (omit those not used).\n* `markdown` is the final Markdown string containing the exact original text with placeholders inserted at chosen positions.\n\n---\n\n### Procedure\n\n1. Read `article.title` and `article.body`.\n2. Detect which of `image_content1..3` have a **non-empty** `prompt`; only those are eligible. Map them to their `placeholder` values, preserving numeric order (`img1`, then `img2`, then `img3`).\n3. Build Markdown\n4. Return the JSON object exactly as specified.\n\n**Remember:** Layout only. Do not expose or restate any `prompt` text.\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        3040,
+        528
+      ],
+      "id": "13ff4628-3492-4cd3-b726-0cb3c0fd0fad",
+      "name": "Basic LLM Chain3",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3-30b-a3b-instruct-2507",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        3040,
+        752
+      ],
+      "id": "e888d755-bc90-4665-adbf-76df07366c09",
+      "name": "OpenRouter Chat Model3",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Y27hkJQbBkswsWZh",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"format\": \"markdown\",\n  \"used_placeholders\": [\"图片占位符\"],\n  \"markdown\": \"# Title...\\n\\n{{img1}}\\n\\nParagraph...\\n\\n{{img2}}\\n\\n{{img3}}...\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        3184,
+        752
+      ],
+      "id": "b16f7505-1e1b-41fe-8bac-87e4a70bbc19",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a9333aa0-aa40-4ce1-bbfe-a4705e5f2c3a",
+              "name": "markdown_raw",
+              "value": "={{ $json.output.markdown }}",
+              "type": "string"
+            },
+            {
+              "id": "4a780d4e-d34f-4e17-8130-91eac2a7051e",
+              "name": "img1_url",
+              "value": "={{ ($items(\"HTTP Request\")[0]?.json?.choices?.[0]?.message?.images?.[0]?.image_url?.url) || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "8305989a-b3dc-48f8-b24e-e5dd0a91af3b",
+              "name": "img2_url",
+              "value": "={{ ($items(\"HTTP Request1\")[0]?.json?.choices?.[0]?.message?.images?.[0]?.image_url?.url) || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "0395f549-f9d2-47e5-b19f-d35ca4e3a2e4",
+              "name": "img3_url",
+              "value": "={{ ($items(\"HTTP Request2\")[0]?.json?.choices?.[0]?.message?.images?.[0]?.image_url?.url) || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3392,
+        528
+      ],
+      "id": "7479882c-b0c2-40f0-b57f-49c3e7e5ff17",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b81f2da3-7ed3-40a3-a416-6e7ec11e33e8",
+              "name": "markdown",
+              "value": "={{\n  ($json.markdown_raw || '')\n    .replace(new RegExp('\\\\{\\\\{img1\\\\}\\\\}','g'), $json.img1_url || '')\n    .replace(new RegExp('\\\\{\\\\{img2\\\\}\\\\}','g'), $json.img2_url || '')\n    .replace(new RegExp('\\\\{\\\\{img3\\\\}\\\\}','g'), $json.img3_url || '')\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3616,
+        528
+      ],
+      "id": "d69d9618-bf40-4a88-861c-262d98480308",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+          "mode": "list",
+          "cachedResultName": "Qwen/Qwen3-30B-A3B-Instruct-2507"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        688
+      ],
+      "id": "a3aeee9f-e58a-440f-9047-49927ebc6bc2",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "9kbp9E0YqRa7G5Km",
+          "name": "硅基流动"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are Stage 3 – Article Generator in an n8n content pipeline.\nUpstream provides:\n\nconfig (brand basics and tone/“do & don’t” rules).\n\nidea (title, thesis, key_messages, outline, SEO keywords, goal, CTA).\n{{ $json.chatInput }}\nYour task: Write a publish-ready self-media article that will attract clicks, saves, and shares.\nOutput format: Return one single string only (UTF-8). No JSON, no code fences, no extra explanations.\n\nFirst line = the headline.\n\nBlank line.\n\nThen the body text.\nYou may use lightweight Markdown for readability (subheads ###, bold, lists).\n\nNon-negotiables\n\nBrand tone: Obey config.brand_tone.writing_style.voice and its do/don’t rules; professional, concise, engineering-oriented; no competitor bashing or hype.\n\nLanguage: Mirror the language of the inputs (default to English if unclear).\n\nSingle string output: Title + body in one block; no “Title:” label, no metadata, no hashtags section.\n\n“Viral” writing rules to apply\n\nHeadline (≤ 65 characters): specific, outcome-oriented, use numbers/contrast/tension (e.g., “40% cost cut without accuracy loss”). Avoid clickbait.\n\nHook (first 1–2 sentences): create curiosity or urgency with a concrete stat or stakes.\n\nScannability: short paragraphs (≤ 2 lines), bullets/numbered steps, bold key phrases, clear subheads.\n\nFramework: structure the piece with PAS (Problem–Agitation–Solution) or AIDA (Attention–Interest–Desire–Action). Pick one and stick to it.\n\nSpecifics beat generalities: show 2–4 concrete facts, mini-examples, or before/after numbers drawn from the report.\n\nBalanced credibility: include a brief “limits/risks” section if relevant (from the report).\n\nSEO integration: weave idea.seo.primary and relevant secondary terms naturally into the headline/lead/body (no stuffing).\n\nCTA: end with one clear action aligned to idea.goal (e.g., “Download the checklist” or “Book a review”). No hashtags.\n\nLength targets (guidance, not hard caps)\n\nBody: ~300–700 words. Prioritize clarity and momentum; cut fluff.\n\nOutput shape (example of formatting only — do not include this note in your answer)\nAmazing Headline That Promises a Concrete Outcome\n\n### Hook\nTwo punchy sentences with a striking number and the tension/problem.\n\n### Problem → Impact\nShort paragraphs; bold key phrases.\n\n### Solution / Steps\n- Bullet 1 with a concrete action\n- Bullet 2 with a benchmark or example\n- Bullet 3 with a trade-off\n\n### Call to Action\nOne specific next step aligned to the goal.\n\n#language\n  if the content of config is chinese,you should use chinese to generate an article\n\nRemember: Output only the article (headline + body) as a single string—no JSON, no extra commentarys.the article don't have the word of \"Hook\",\"CAT\",just have the sentence about that"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        432
+      ],
+      "id": "ab79b18e-8c95-45f0-acd8-07dfcb426c85",
+      "name": "AI Agent"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "115.190.109.17:5678",
+            "connection": "keep-alive",
+            "content-length": "4794",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0",
+            "content-type": "application/json",
+            "accept": "*/*",
+            "origin": "http://115.190.109.17:3000",
+            "referer": "http://115.190.109.17:3000/",
+            "accept-encoding": "gzip, deflate",
+            "accept-language": "zh-CN,zh;q=0.9"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "config": {
+              "brand_basic": {
+                "name": "DeepSeek",
+                "company": "Hangzhou DeepSeek Foundation AI Technology Research Co., Ltd.",
+                "website": "https://www.deepseek.com/",
+                "tagline": "Into the unknown",
+                "businesses": [
+                  "Development and deployment of large language models (e.g., DeepSeek-V3.1, DeepSeek-R1)",
+                  "Open API platform for developers (OpenAI-compatible)",
+                  "Chat applications for end users (Web and mobile app)",
+                  "Open-source model and technical report publishing"
+                ],
+                "products": [
+                  {
+                    "name": "DeepSeek-V3.1",
+                    "purpose": "Flagship general-purpose model for dialogue and tool use, enhanced reasoning and agent capabilities across Web, App, and API",
+                    "audience": [
+                      "Application developers",
+                      "Internal enterprise teams",
+                      "Power users"
+                    ]
+                  },
+                  {
+                    "name": "DeepSeek-R1",
+                    "purpose": "Reasoning-centric model supporting structured output and function/tool calls; optimized for math, code, and planning tasks",
+                    "audience": [
+                      "AI/algorithm engineers",
+                      "Automation/data teams",
+                      "Academic researchers"
+                    ]
+                  },
+                  {
+                    "name": "DeepSeek-R1-Zero (Open Source)",
+                    "purpose": "Open-source base/distilled model for reasoning tasks, enabling localization, reproducible experiments, and secondary research",
+                    "audience": [
+                      "Researchers",
+                      "Universities/Labs",
+                      "Open-source community"
+                    ]
+                  },
+                  {
+                    "name": "DeepSeek API Platform",
+                    "purpose": "OpenAI-compatible API with model list, pricing, long-context support, and tool/function calling capabilities",
+                    "audience": [
+                      "SaaS/startups",
+                      "Enterprise integration teams",
+                      "Workflow/Agent builders"
+                    ]
+                  },
+                  {
+                    "name": "DeepSeek Chat (Web/App)",
+                    "purpose": "User-facing chat and content creation portal powered by V3.1/R1, suitable for writing, coding, and knowledge Q&A",
+                    "audience": [
+                      "Content creators",
+                      "Knowledge workers",
+                      "Individual users"
+                    ]
+                  }
+                ]
+              },
+              "brand_tone": {
+                "keywords": [
+                  "High cost-effectiveness",
+                  "Engineering-oriented",
+                  "Open/Open-source",
+                  "Strong reasoning",
+                  "Developer-friendly"
+                ],
+                "writing_style": {
+                  "voice": "Concise and factual, focused on data and comparisons; minimal adjectives",
+                  "do": [
+                    "Provide objective metrics (e.g., price, context length, features) along with runnable examples",
+                    "Clearly define compliance boundaries and usability scope; include documentation links",
+                    "Emphasize open-source assets (weights, licenses, technical reports) and migration convenience (OpenAI compatibility)"
+                  ],
+                  "dont": [
+                    "Avoid exaggerated claims or unverifiable promises",
+                    "Do not belittle competitors",
+                    "Avoid fluffy marketing language without concrete parameters"
+                  ]
+                }
+              },
+              "audience_personas": [
+                {
+                  "name": "Independent Developers / Startup Teams",
+                  "goals": [
+                    "Launch AI features at low cost",
+                    "Quickly integrate with OpenAI-compatible APIs",
+                    "Ensure production stability"
+                  ],
+                  "pain_points": [
+                    "High inference/API costs",
+                    "Vendor lock-in",
+                    "Complex tool calling"
+                  ],
+                  "care_about": [
+                    "Transparent pricing",
+                    "Compatibility and stability",
+                    "Function calling, JSON output, long context"
+                  ]
+                },
+                {
+                  "name": "Internal Enterprise / Automation Teams",
+                  "goals": [
+                    "Process automation and structured output",
+                    "Observability and SLA",
+                    "Flexible multi-model orchestration"
+                  ],
+                  "pain_points": [
+                    "Output drift",
+                    "Compliance and permission concerns",
+                    "Integration complexity"
+                  ],
+                  "care_about": [
+                    "Reasoning stability",
+                    "Tool/agent orchestration",
+                    "Monitoring and quota control"
+                  ]
+                },
+                {
+                  "name": "Researchers / Educators",
+                  "goals": [
+                    "Reproducible experiments",
+                    "Open-source weights available",
+                    "Fine-tuning/distillation support"
+                  ],
+                  "pain_points": [
+                    "Difficulties reproducing closed-source results",
+                    "High cost",
+                    "Lack of training transparency"
+                  ],
+                  "care_about": [
+                    "Open-source licenses and weights",
+                    "Technical reports/papers",
+                    "Community ecosystem"
+                  ]
+                },
+                {
+                  "name": "Content Creators / Power Users",
+                  "goals": [
+                    "High-value chat/writing/coding assistant",
+                    "Mobile accessibility",
+                    "Template-based workflows"
+                  ],
+                  "pain_points": [
+                    "Complex configuration",
+                    "Poor mobile UX",
+                    "Inconsistent output"
+                  ],
+                  "care_about": [
+                    "App experience",
+                    "Response quality and consistency",
+                    "Usage cost"
+                  ]
+                }
+              ]
+            },
+            "ideas": {
+              "title": "Building AI Agents",
+              "thesis": "A practical framework for creating autonomous agents powered by LLMs.",
+              "why_now": "Growing searches for 'a survey on large language model based autonomous agents' indicate rising developer interest.",
+              "audience": "AI engineers and full-stack developers",
+              "goal": "Generate 20 qualified leads for a workshop",
+              "key_messages": [
+                "Agents plan, act, and reflect using memory and tools",
+                "Use LLMs as controllers but add safeguards",
+                "Start simple: agent that searches and summarizes"
+              ],
+              "outline": [
+                "Key components: planner, memory, tools, feedback loop",
+                "Design patterns for task automation",
+                "Demo: build a self-researching agent with search tool",
+                "Best practices to avoid infinite loops"
+              ],
+              "seo": {
+                "primary": "large language model based autonomous agents",
+                "secondary": [
+                  "build a large language model",
+                  "ai agent framework"
+                ]
+              },
+              "tone": "Actionable, structured, forward-looking; no exaggerated claims.",
+              "cta": "Sign up for the agent-building workshop",
+              "status": "pending"
+            },
+            "idea_title": "Building AI Agents"
+          },
+          "webhookUrl": "http://115.190.109.17:5678/webhook/content1",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Convert to File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Convert to File2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain3",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "336532ea-046f-493b-b52a-b732ab720eac",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "87fe02579b858b6bc4d89b18acd03f799c7636de311824db66bbc9207f92d9c4"
+  },
+  "id": "L8jFHug2NrYxfo6l",
+  "tags": []
+}

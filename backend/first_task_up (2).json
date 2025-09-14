@@ -1,0 +1,1068 @@
+{
+  "name": "first_task_up",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "set",
+        "responseMode": "lastNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1248,
+        736
+      ],
+      "id": "17bab49f-f24f-4d0c-bc37-16e123240236",
+      "name": "Webhook",
+      "webhookId": "06a7f1c2-d33d-4fac-a465-1be3aaf15f02"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"q1\": { \"type\": \"string\", \"minLength\": 2, \"maxLength\": 24 },\n    \"q2\": { \"type\": \"string\", \"minLength\": 2, \"maxLength\": 24 },\n    \"q3\": { \"type\": \"string\", \"minLength\": 2, \"maxLength\": 24 }\n  },\n  \"required\": [\"q1\", \"q2\", \"q3\"],\n  \"additionalProperties\": false\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -832,
+        928
+      ],
+      "id": "1712e455-0b9b-4d71-8434-6ca8055b51e1",
+      "name": "Structured Output Parser",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.output.q1 }}"
+            },
+            {
+              "name": "geo",
+              "value": "US"
+            },
+            {
+              "name": "hl",
+              "value": "en"
+            },
+            {
+              "name": "date",
+              "value": "={{ $now.minus({ days: 7 }).format('yyyy-MM-dd') }} {{ $now.format('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "data_type",
+              "value": "RELATED_QUERIES"
+            },
+            {
+              "name": "engine",
+              "value": "google_trends"
+            },
+            {
+              "name": "api_key"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -464,
+        128
+      ],
+      "id": "86a5b7cd-d74e-401a-8581-34c6b2e6ab8b",
+      "name": "Google Trends1"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.output.q2 }}"
+            },
+            {
+              "name": "geo",
+              "value": "US"
+            },
+            {
+              "name": "hl",
+              "value": "en"
+            },
+            {
+              "name": "date",
+              "value": "={{ $now.minus({ days: 7 }).format('yyyy-MM-dd') }} {{ $now.format('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "data_type",
+              "value": "RELATED_QUERIES"
+            },
+            {
+              "name": "engine",
+              "value": "google_trends"
+            },
+            {
+              "name": "api_key"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -464,
+        736
+      ],
+      "id": "a2a4a1ef-24ee-4d07-a403-4cc477939011",
+      "name": "Google Trends2"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.output.q3 }}"
+            },
+            {
+              "name": "geo",
+              "value": "US"
+            },
+            {
+              "name": "hl",
+              "value": "en"
+            },
+            {
+              "name": "date",
+              "value": "={{ $now.minus({ days: 7 }).format('yyyy-MM-dd') }} {{ $now.format('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "data_type",
+              "value": "RELATED_QUERIES"
+            },
+            {
+              "name": "engine",
+              "value": "google_trends"
+            },
+            {
+              "name": "api_key"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -464,
+        1344
+      ],
+      "id": "49993590-8a32-4a90-8014-a5ccc68b74db",
+      "name": "Google Trends3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a “Multi-Topic Query Generator”. Your role in the workflow is to analyze a brand configuration and produce three decoupled search keywords for trend discovery and soft promotion. Your task is to receive a brand configuration JSON (fields may include brand_basic, brand_tone, audience_personas, products, etc.) and—based on the brand’s real businesses, product categories, audience interests, and tone keywords—generate three brand-aligned keywords that can boost community visibility and lightweight advertising.  Output format (JSON only, no extra text, no code fences, no comments): {\"q1\":\"...\", \"q2\":\"...\", \"q3\":\"...\"}  Rules and constraints: 1) Return ONLY one JSON object with exactly the keys q1, q2, q3. 2) Relevance & intent:    - Prefer terms directly sourced from the brand’s product **categories** and **business lines**.    - It is allowed to include ONE adjacent/halo topic that the brand does not currently ship but is strongly related to its capabilities or user base (e.g., for an AI model brand: “ai ide”, “agentic workflows”).    - Each query must support the goals of community influence and soft advertising (discoverable, discussable). 3) Decoupling:    - Low semantic overlap across q1/q2/q3. Cover three distinct angles, for example:      • product/category level (e.g., “aerial drones”, “large language models”, “wireless microphones”, “clinical trials”)      • use cases / problems / outcomes (e.g., “infrastructure inspection”, “patient monitoring”, “stem tutoring”)      • ecosystem / methodology / policy / tooling (e.g., “flight regulations”, “gene editing”, “curriculum design”, “model distillation”)    - No synonyms; avoid hyponyms/hypernyms of one another; avoid sharing the same head noun. 4) Brand name usage: do NOT use the brand name unless the brand itself is the current public topic. 5) Language: output English queries. 6) Length and form:    - 1–3 words, lowercase, space-separated; no punctuation or special symbols; 2–24 characters each. 7) Discoverability: prefer higher-level concepts that aggregate news/discussion within the brand’s domain; avoid overly narrow SKUs or model numbers.  Example (do NOT copy; generate from the actual input): {\"q1\":\"large language model\", \"q2\":\"agentic workflows\", \"q3\":\"ai ide\"} 8) if the content of config is chinese,you should use chinese to generate the query "
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -928,
+        736
+      ],
+      "id": "a4c3fc0d-70c3-459b-a081-c59c8776eafd",
+      "name": "Basic LLM Chain",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\"data\":{\n  \"related_queries\": {\n    \"rising\": {{ ($json.related_queries?.rising || []).map(i => ({ \"query\": i.query })) }},\n    \"top\":    {{ ($json.related_queries?.top    || []).map(i => ({ \"query\": i.query })) }}\n  },\n  \"seed\": \"={{$json.search_parameters.q}}\"\n}\n}\n",
+        "options": {
+          "dotNotation": false
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        1344
+      ],
+      "id": "12d15021-5815-4f1a-b695-6e2756be5e17",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\"data\":{\n  \"related_queries\": {\n    \"rising\": {{ ($json.related_queries?.rising || []).map(i => ({ \"query\": i.query })) }},\n    \"top\":    {{ ($json.related_queries?.top    || []).map(i => ({ \"query\": i.query })) }}\n  },\n  \"seed\": \"={{$json.search_parameters.q}}\"\n}\n}\n",
+        "options": {
+          "dotNotation": false
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        736
+      ],
+      "id": "296e0270-bfd6-4a80-a219-ce7cd1d3f6be",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\"data\":{\n  \"related_queries\": {\n    \"rising\": {{ ($json.related_queries?.rising || []).map(i => ({ \"query\": i.query })) }},\n    \"top\":    {{ ($json.related_queries?.top    || []).map(i => ({ \"query\": i.query })) }}\n  },\n  \"seed\": \"={{$json.search_parameters.q}}\"\n}\n}\n",
+        "options": {
+          "dotNotation": false
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        128
+      ],
+      "id": "4e60a70a-4467-4775-a926-34abb2cebded",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}\n#language\nif the content of BRAND_CONFIG is chinese you should use chinese to generate  chinese ideas",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a social content strategist. Your job in this workflow is to turn ONE “seed” (topic keyword) plus its Google Trends queries into 2-3 brand-relevant topic ideas, each formatted with the fields below.\n\n#language\nif the content of BRAND_CONFIG is chinese you should use chinese to generate  chinese ideas\n\nINPUTS\n- BRAND_CONFIG (JSON with brand_basic, brand_tone, audience_personas, products). It is here:\n{{ $('Webhook').item.json.body }}\n- HOTSPOT (single item for this run):\n  {\n    \"related_queries\": { \"rising\": [{ \"query\": \"<string>\" }...], \"top\": [{ \"query\": \"<string>\" }...] },\n  \"seed\": \"<string>\",\n  }\n\nTASK\n1) Normalize\n   - From related_queries.rising + top, collect query strings; case-insensitive dedupe; remove near duplicates and generic “what is …” definitions unless they provide a distinct educational angle.\n   - If both lists are empty or low-signal, use the seed alone.\n\n2) Strategy\n   - Combine BRAND_CONFIG with the seed/queries to create **2-3 distinct ideas** aligned to the brand’s businesses/products and target personas.\n   - Each idea must support community growth and soft promotion (teach first, promote subtly), avoid exaggeration or competitor bashing, and respect BRAND_TONE do/don’t.\n\nOUTPUT (JSON ONLY — no prose, no code fences)\nReturn exactly:\n{\n  \"ideas\": [\n    {\n      \"title\": \"≤20 characters\",\n      \"thesis\": \"one-sentence core angle/claim\",\n      \"audience\": \"target segment/persona\",\n      \"goal\": \"business or engagement KPI (e.g., saves >5%, CTR >3%, 20 leads)\",\n      \"key_messages\": [\"point1\",\"point2\",\"point3\"],\n      \"outline\": [\"section1\",\"section2\",\"section3\"],\n      \"seo\": { \"primary\": \"one focus keyword\", \"secondary\": [\"alt1\",\"alt2\"] },\n      \"tone\": \"style aligned with brand_tone (voice + constraints)\",\n      \"cta\": \"concise call to action\"\n    }\n  ]\n}\n\nRULES & CONSTRAINTS\n- Produce 2-3 items in ideas[]. No overlap: each idea must use a different angle (e.g., product/category, use case/outcome, method/policy/tooling).\n- Map fields carefully:\n  • title ≤ 20 characters; informative, not clickbait.\n  • audience: reference BRAND_CONFIG.audience_personas.\n  • goal: include a measurable KPI suitable for the channel(s) implied by BRAND_CONFIG.\n  • key_messages: 3 concise takeaways; avoid vague adjectives.\n  • outline: 3–5 bullets that could be turned into sections/cards.\n  • seo.primary: choose from the seed or top queries; secondary: up to 2 related terms.\n  • tone: reflect BRAND_CONFIG.brand_tone.voice/keywords and avoid items in brand_tone.dont.\n  • cta: one short action line (download, try, learn more, sign up, etc.).\n- Language: write in the primary language implied by BRAND_CONFIG (default to English if unclear).\n- If there are zero useful queries, generate **evergreen** ideas from the seed + BRAND_CONFIG and mark why_now accordingly (e.g., “evergreen demand for <seed> among <persona>”).\n- the ideas must be significantly related to the BRAND_CONFIG\n- Output must validate against the schema above; do not add extra fields, placeholders, or commentary.\nHere is a output example:\n{\n  \"ideas\": [\n    {\n      \"title\": \"Agent IDE Quickstart\",\n      \"thesis\": \"Show developers how to scaffold an AI agent IDE project in minutes.\",\n      \"why_now\": \"Query spikes for “ai ide” and “agentic workflows” indicate high builder interest this week.\",\n      \"audience\": \"Independent developers and startup engineers\",\n      \"goal\": \"Drive >3% CTR and 50+ API signups\",\n      \"key_messages\": [\n        \"One-command project setup\",\n        \"Built-in tools and debugging\",\n        \"Low cost local/dev options\"\n      ],\n      \"outline\": [\n        \"Prereqs and template init\",\n        \"Add tools: search, functions\",\n        \"Debug and eval loops\",\n        \"Ship a minimal agent IDE\"\n      ],\n      \"seo\": {\n        \"primary\": \"ai ide\",\n        \"secondary\": [\"agent workflow\", \"developer tools\"]\n      },\n      \"tone\": \"Concise, practical, data-first; no hype or competitor bashing.\",\n      \"cta\": \"Clone the template and start building\"\n    },\n    {\n      \"title\": \"LLM Cost Tuning\",\n      \"thesis\": \"A practical guide to cut inference spend without hurting quality.\",\n      \"why_now\": \"Sustained interest in “large language models” and “model distillation”.\",\n      \"audience\": \"SaaS teams and platform engineers\",\n      \"goal\": \"Generate 20 qualified leads for a cost audit session\",\n      \"key_messages\": [\n        \"Pick fit-for-purpose models\",\n        \"Control tokens and caching\",\n        \"Batching and streaming tactics\"\n      ],\n      \"outline\": [\n        \"Baseline your usage and KPIs\",\n        \"Prompt+context optimization\",\n        \"Routing small vs. large models\",\n        \"Distill and cache responses\",\n        \"Case study: 40% cost drop\"\n      ],\n      \"seo\": {\n        \"primary\": \"llm cost optimization\",\n        \"secondary\": [\"token budgeting\", \"model routing\"]\n      },\n      \"tone\": \"Engineering-oriented, evidence-led, compliant.\",\n      \"cta\": \"Book a free cost review\"\n    },\n    {\n      \"title\": \"RAG Quality Playbook\",\n      \"thesis\": \"Systematic steps to boost retrieval-augmented generation accuracy.\",\n      \"why_now\": \"Growing searches for “training data” and “generative ai”.\",\n      \"audience\": \"Data teams and product managers\",\n      \"goal\": \"Achieve save rate >5% and 2 partner inquiries\",\n      \"key_messages\": [\n        \"Index quality beats size\",\n        \"Eval sets catch regressions\",\n        \"Guardrails cut hallucinations\"\n      ],\n      \"outline\": [\n        \"Choose chunking/embeddings\",\n        \"Freshness and reindex policy\",\n        \"Evals: retrieval + answer\",\n        \"Fallbacks and guardrails\",\n        \"Monitoring in production\"\n      ],\n      \"seo\": {\n        \"primary\": \"rag evaluation\",\n        \"secondary\": [\"retrieval quality\", \"hallucination guardrails\"]\n      },\n      \"tone\": \"Clear, measured, actionable; avoid overstated claims.\",\n      \"cta\": \"Download the eval checklist\"\n    },\n  ]\n}\n\n#language\nif the content of BRAND_CONFIG is chinese you should use chinese to generate  chinese ideas"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        16,
+        -80
+      ],
+      "id": "ef683468-a3b0-4fc6-be92-cf0ccce20a1b",
+      "name": "Basic LLM Chain2",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n  {\n    \"output\": {\n      \"ideas\": [\n        {\n          \"title\": \"High-Throughput Tips\",\n          \"thesis\": \"Learn how to streamline academic research using high-throughput data methods without sacrificing rigor.\",\n          \"why_now\": \"Rising searches for 'high-throughput meaning' and sustained top queries for 'scholar' and 'google scholar' indicate researchers seek efficient workflows.\",\n          \"audience\": \"Academic researchers and grad students\",\n          \"goal\": \"Drive 15+ newsletter signups and 5% CTR on resource download\",\n          \"key_messages\": [\n            \"Use automated citation tools to reduce manual work\",\n            \"Filter results with precise Boolean operators\",\n            \"Batch-download papers via Google Scholar APIs\"\n          ],\n          \"outline\": [\n            \"Why high-throughput matters in academia\",\n            \"Tools to automate literature review\",\n            \"How to structure search queries for precision\",\n            \"Avoiding information overload with filters\"\n          ],\n          \"seo\": {\n            \"primary\": \"high-throughput meaning\",\n            \"secondary\": [\n              \"google scholar tips\",\n              \"academic research efficiency\"\n            ]\n          },\n          \"tone\": \"Calm, authoritative, and subtly educational—no hype, no jargon overload.\",\n          \"cta\": \"Download the scholar workflow checklist\"\n        },\n        {\n          \"title\": \"Scholar Workflow\",\n          \"thesis\": \"Maximize scholarly output by systematizing literature intake and annotation using high-throughput techniques.\",\n          \"why_now\": \"Top queries confirm strong interest in 'scholar' and 'high-throughput meaning'—researchers want scalable methods.\",\n          \"audience\": \"Early-career academics and postdocs\",\n          \"goal\": \"Generate 20 qualified leads for a free productivity audit\",\n          \"key_messages\": [\n            \"Automate PDF tagging with metadata tools\",\n            \"Create reusable search templates for recurring topics\",\n            \"Sync annotations across devices using cloud libraries\"\n          ],\n          \"outline\": [\n            \"The bottleneck: manual paper triage\",\n            \"Build your personal high-throughput pipeline\",\n            \"Integrate Zotero, Notion, and Google Scholar\",\n            \"Track progress with weekly metrics\"\n          ],\n          \"seo\": {\n            \"primary\": \"google scholar\",\n            \"secondary\": [\n              \"research workflow\",\n              \"academic productivity\"\n            ]\n          },\n          \"tone\": \"Practical, quiet confidence—focus on systems, not shortcuts.\",\n          \"cta\": \"Get the template bundle\"\n        }\n      ]\n    }\n  }\n]",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        144
+      ],
+      "id": "05989ea1-b9d1-4d4d-93cb-cb9f275dc16a",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        704,
+        736
+      ],
+      "id": "f2343bf4-fd83-49a1-ab5f-643404f067a6",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        480,
+        720
+      ],
+      "id": "a542be39-6821-40c8-af14-bbe0bae8b4f0",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}\n#language\nif the content of BRAND_CONFIG is chinese you should use chinese to generate  chinese ideas",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a social content strategist. Your job in this workflow is to turn ONE “seed” (topic keyword) plus its Google Trends queries into 2-3 brand-relevant topic ideas, each formatted with the fields below.\n\n#language\nif the content of BRAND_CONFIG is chinese you should use chinese to generate  chinese ideas\n\nINPUTS\n- BRAND_CONFIG (JSON with brand_basic, brand_tone, audience_personas, products). It is here:\n  {{ $('Webhook').item.json.body }}\n- HOTSPOT (single item for this run):\n  {\n    \"related_queries\": { \"rising\": [{ \"query\": \"<string>\" }...], \"top\": [{ \"query\": \"<string>\" }...] },\n  \"seed\": \"<string>\",\n  }\n\nTASK\n1) Normalize\n   - From related_queries.rising + top, collect query strings; case-insensitive dedupe; remove near duplicates and generic “what is …” definitions unless they provide a distinct educational angle.\n   - If both lists are empty or low-signal, use the seed alone.\n\n2) Strategy\n   - Combine BRAND_CONFIG with the seed/queries to create **2-3 distinct ideas** aligned to the brand’s businesses/products and target personas.\n   - Each idea must support community growth and soft promotion (teach first, promote subtly), avoid exaggeration or competitor bashing, and respect BRAND_TONE do/don’t.\n\nOUTPUT (JSON ONLY — no prose, no code fences)\nReturn exactly:\n{\n  \"ideas\": [\n    {\n      \"title\": \"≤20 characters\",\n      \"thesis\": \"one-sentence core angle/claim\",\n      \"audience\": \"target segment/persona\",\n      \"goal\": \"business or engagement KPI (e.g., saves >5%, CTR >3%, 20 leads)\",\n      \"key_messages\": [\"point1\",\"point2\",\"point3\"],\n      \"outline\": [\"section1\",\"section2\",\"section3\"],\n      \"seo\": { \"primary\": \"one focus keyword\", \"secondary\": [\"alt1\",\"alt2\"] },\n      \"tone\": \"style aligned with brand_tone (voice + constraints)\",\n      \"cta\": \"concise call to action\"\n    }\n  ]\n}\n\nRULES & CONSTRAINTS\n- Produce 2-3 items in ideas[]. No overlap: each idea must use a different angle (e.g., product/category, use case/outcome, method/policy/tooling).\n- Map fields carefully:\n  • title ≤ 20 characters; informative, not clickbait.\n  • audience: reference BRAND_CONFIG.audience_personas.\n  • goal: include a measurable KPI suitable for the channel(s) implied by BRAND_CONFIG.\n  • key_messages: 3 concise takeaways; avoid vague adjectives.\n  • outline: 3–5 bullets that could be turned into sections/cards.\n  • seo.primary: choose from the seed or top queries; secondary: up to 2 related terms.\n  • tone: reflect BRAND_CONFIG.brand_tone.voice/keywords and avoid items in brand_tone.dont.\n  • cta: one short action line (download, try, learn more, sign up, etc.).\n- Language: write in the primary language implied by BRAND_CONFIG (default to English if unclear).\n- If there are zero useful queries, generate **evergreen** ideas from the seed + BRAND_CONFIG and mark why_now accordingly (e.g., “evergreen demand for <seed> among <persona>”).\n- the ideas must be significantly related to the BRAND_CONFIG\n- Output must validate against the schema above; do not add extra fields, placeholders, or commentary.\nHere is a output example:\n{\n  \"ideas\": [\n    {\n      \"title\": \"Agent IDE Quickstart\",\n      \"thesis\": \"Show developers how to scaffold an AI agent IDE project in minutes.\",\n      \"why_now\": \"Query spikes for “ai ide” and “agentic workflows” indicate high builder interest this week.\",\n      \"audience\": \"Independent developers and startup engineers\",\n      \"goal\": \"Drive >3% CTR and 50+ API signups\",\n      \"key_messages\": [\n        \"One-command project setup\",\n        \"Built-in tools and debugging\",\n        \"Low cost local/dev options\"\n      ],\n      \"outline\": [\n        \"Prereqs and template init\",\n        \"Add tools: search, functions\",\n        \"Debug and eval loops\",\n        \"Ship a minimal agent IDE\"\n      ],\n      \"seo\": {\n        \"primary\": \"ai ide\",\n        \"secondary\": [\"agent workflow\", \"developer tools\"]\n      },\n      \"tone\": \"Concise, practical, data-first; no hype or competitor bashing.\",\n      \"cta\": \"Clone the template and start building\"\n    },\n    {\n      \"title\": \"LLM Cost Tuning\",\n      \"thesis\": \"A practical guide to cut inference spend without hurting quality.\",\n      \"why_now\": \"Sustained interest in “large language models” and “model distillation”.\",\n      \"audience\": \"SaaS teams and platform engineers\",\n      \"goal\": \"Generate 20 qualified leads for a cost audit session\",\n      \"key_messages\": [\n        \"Pick fit-for-purpose models\",\n        \"Control tokens and caching\",\n        \"Batching and streaming tactics\"\n      ],\n      \"outline\": [\n        \"Baseline your usage and KPIs\",\n        \"Prompt+context optimization\",\n        \"Routing small vs. large models\",\n        \"Distill and cache responses\",\n        \"Case study: 40% cost drop\"\n      ],\n      \"seo\": {\n        \"primary\": \"llm cost optimization\",\n        \"secondary\": [\"token budgeting\", \"model routing\"]\n      },\n      \"tone\": \"Engineering-oriented, evidence-led, compliant.\",\n      \"cta\": \"Book a free cost review\"\n    },\n    {\n      \"title\": \"RAG Quality Playbook\",\n      \"thesis\": \"Systematic steps to boost retrieval-augmented generation accuracy.\",\n      \"why_now\": \"Growing searches for “training data” and “generative ai”.\",\n      \"audience\": \"Data teams and product managers\",\n      \"goal\": \"Achieve save rate >5% and 2 partner inquiries\",\n      \"key_messages\": [\n        \"Index quality beats size\",\n        \"Eval sets catch regressions\",\n        \"Guardrails cut hallucinations\"\n      ],\n      \"outline\": [\n        \"Choose chunking/embeddings\",\n        \"Freshness and reindex policy\",\n        \"Evals: retrieval + answer\",\n        \"Fallbacks and guardrails\",\n        \"Monitoring in production\"\n      ],\n      \"seo\": {\n        \"primary\": \"rag evaluation\",\n        \"secondary\": [\"retrieval quality\", \"hallucination guardrails\"]\n      },\n      \"tone\": \"Clear, measured, actionable; avoid overstated claims.\",\n      \"cta\": \"Download the eval checklist\"\n    },\n  ]\n}\n\n#language\nif the content of BRAND_CONFIG is chinese you should use chinese to generate  chinese ideas"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        16,
+        528
+      ],
+      "id": "543d5849-06f8-488f-9b50-6fb4af2f3bea",
+      "name": "Basic LLM Chain3",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n  {\n    \"output\": {\n      \"ideas\": [\n        {\n          \"title\": \"High-Throughput Tips\",\n          \"thesis\": \"Learn how to streamline academic research using high-throughput data methods without sacrificing rigor.\",\n          \"why_now\": \"Rising searches for 'high-throughput meaning' and sustained top queries for 'scholar' and 'google scholar' indicate researchers seek efficient workflows.\",\n          \"audience\": \"Academic researchers and grad students\",\n          \"goal\": \"Drive 15+ newsletter signups and 5% CTR on resource download\",\n          \"key_messages\": [\n            \"Use automated citation tools to reduce manual work\",\n            \"Filter results with precise Boolean operators\",\n            \"Batch-download papers via Google Scholar APIs\"\n          ],\n          \"outline\": [\n            \"Why high-throughput matters in academia\",\n            \"Tools to automate literature review\",\n            \"How to structure search queries for precision\",\n            \"Avoiding information overload with filters\"\n          ],\n          \"seo\": {\n            \"primary\": \"high-throughput meaning\",\n            \"secondary\": [\n              \"google scholar tips\",\n              \"academic research efficiency\"\n            ]\n          },\n          \"tone\": \"Calm, authoritative, and subtly educational—no hype, no jargon overload.\",\n          \"cta\": \"Download the scholar workflow checklist\"\n        },\n        {\n          \"title\": \"Scholar Workflow\",\n          \"thesis\": \"Maximize scholarly output by systematizing literature intake and annotation using high-throughput techniques.\",\n          \"why_now\": \"Top queries confirm strong interest in 'scholar' and 'high-throughput meaning'—researchers want scalable methods.\",\n          \"audience\": \"Early-career academics and postdocs\",\n          \"goal\": \"Generate 20 qualified leads for a free productivity audit\",\n          \"key_messages\": [\n            \"Automate PDF tagging with metadata tools\",\n            \"Create reusable search templates for recurring topics\",\n            \"Sync annotations across devices using cloud libraries\"\n          ],\n          \"outline\": [\n            \"The bottleneck: manual paper triage\",\n            \"Build your personal high-throughput pipeline\",\n            \"Integrate Zotero, Notion, and Google Scholar\",\n            \"Track progress with weekly metrics\"\n          ],\n          \"seo\": {\n            \"primary\": \"google scholar\",\n            \"secondary\": [\n              \"research workflow\",\n              \"academic productivity\"\n            ]\n          },\n          \"tone\": \"Practical, quiet confidence—focus on systems, not shortcuts.\",\n          \"cta\": \"Get the template bundle\"\n        }\n      ]\n    }\n  }\n]",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        752
+      ],
+      "id": "f7d46382-57f6-4d57-aa88-e2025e33ef37",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}\n#language\nif the content of BRAND_CONFIG is chinese you should use chinese to generate  chinese ideas",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a social content strategist. Your job in this workflow is to turn ONE “seed” (topic keyword) plus its Google Trends queries into 2-3 brand-relevant topic ideas, each formatted with the fields below.\n\n#language\nif the content of BRAND_CONFIG is chinese you should use chinese to generate  chinese ideas\n\nINPUTS\n- BRAND_CONFIG (JSON with brand_basic, brand_tone, audience_personas, products). It is here:\n  {{ $('Webhook').item.json.body }}\n- HOTSPOT (single item for this run):\n  {\n    \"related_queries\": { \"rising\": [{ \"query\": \"<string>\" }...], \"top\": [{ \"query\": \"<string>\" }...] },\n  \"seed\": \"<string>\",\n  }\n\nTASK\n1) Normalize\n   - From related_queries.rising + top, collect query strings; case-insensitive dedupe; remove near duplicates and generic “what is …” definitions unless they provide a distinct educational angle.\n   - If both lists are empty or low-signal, use the seed alone.\n\n2) Strategy\n   - Combine BRAND_CONFIG with the seed/queries to create **2-3 distinct ideas** aligned to the brand’s businesses/products and target personas.\n   - Each idea must support community growth and soft promotion (teach first, promote subtly), avoid exaggeration or competitor bashing, and respect BRAND_TONE do/don’t.\n\nOUTPUT (JSON ONLY — no prose, no code fences)\nReturn exactly:\n{\n  \"ideas\": [\n    {\n      \"title\": \"≤20 characters\",\n      \"thesis\": \"one-sentence core angle/claim\",\n      \"audience\": \"target segment/persona\",\n      \"goal\": \"business or engagement KPI (e.g., saves >5%, CTR >3%, 20 leads)\",\n      \"key_messages\": [\"point1\",\"point2\",\"point3\"],\n      \"outline\": [\"section1\",\"section2\",\"section3\"],\n      \"seo\": { \"primary\": \"one focus keyword\", \"secondary\": [\"alt1\",\"alt2\"] },\n      \"tone\": \"style aligned with brand_tone (voice + constraints)\",\n      \"cta\": \"concise call to action\"\n    }\n  ]\n}\n\nRULES & CONSTRAINTS\n- Produce 2-3 items in ideas[]. No overlap: each idea must use a different angle (e.g., product/category, use case/outcome, method/policy/tooling).\n- Map fields carefully:\n  • title ≤ 20 characters; informative, not clickbait.\n  • audience: reference BRAND_CONFIG.audience_personas.\n  • goal: include a measurable KPI suitable for the channel(s) implied by BRAND_CONFIG.\n  • key_messages: 3 concise takeaways; avoid vague adjectives.\n  • outline: 3–5 bullets that could be turned into sections/cards.\n  • seo.primary: choose from the seed or top queries; secondary: up to 2 related terms.\n  • tone: reflect BRAND_CONFIG.brand_tone.voice/keywords and avoid items in brand_tone.dont.\n  • cta: one short action line (download, try, learn more, sign up, etc.).\n- Language: write in the primary language implied by BRAND_CONFIG (default to English if unclear).\n- If there are zero useful queries, generate **evergreen** ideas from the seed + BRAND_CONFIG and mark why_now accordingly (e.g., “evergreen demand for <seed> among <persona>”).\n- the ideas must be significantly related to the BRAND_CONFIG\n- Output must validate against the schema above; do not add extra fields, placeholders, or commentary.\nHere is a output example:\n{\n  \"ideas\": [\n    {\n      \"title\": \"Agent IDE Quickstart\",\n      \"thesis\": \"Show developers how to scaffold an AI agent IDE project in minutes.\",\n      \"why_now\": \"Query spikes for “ai ide” and “agentic workflows” indicate high builder interest this week.\",\n      \"audience\": \"Independent developers and startup engineers\",\n      \"goal\": \"Drive >3% CTR and 50+ API signups\",\n      \"key_messages\": [\n        \"One-command project setup\",\n        \"Built-in tools and debugging\",\n        \"Low cost local/dev options\"\n      ],\n      \"outline\": [\n        \"Prereqs and template init\",\n        \"Add tools: search, functions\",\n        \"Debug and eval loops\",\n        \"Ship a minimal agent IDE\"\n      ],\n      \"seo\": {\n        \"primary\": \"ai ide\",\n        \"secondary\": [\"agent workflow\", \"developer tools\"]\n      },\n      \"tone\": \"Concise, practical, data-first; no hype or competitor bashing.\",\n      \"cta\": \"Clone the template and start building\"\n    },\n    {\n      \"title\": \"LLM Cost Tuning\",\n      \"thesis\": \"A practical guide to cut inference spend without hurting quality.\",\n      \"why_now\": \"Sustained interest in “large language models” and “model distillation”.\",\n      \"audience\": \"SaaS teams and platform engineers\",\n      \"goal\": \"Generate 20 qualified leads for a cost audit session\",\n      \"key_messages\": [\n        \"Pick fit-for-purpose models\",\n        \"Control tokens and caching\",\n        \"Batching and streaming tactics\"\n      ],\n      \"outline\": [\n        \"Baseline your usage and KPIs\",\n        \"Prompt+context optimization\",\n        \"Routing small vs. large models\",\n        \"Distill and cache responses\",\n        \"Case study: 40% cost drop\"\n      ],\n      \"seo\": {\n        \"primary\": \"llm cost optimization\",\n        \"secondary\": [\"token budgeting\", \"model routing\"]\n      },\n      \"tone\": \"Engineering-oriented, evidence-led, compliant.\",\n      \"cta\": \"Book a free cost review\"\n    },\n    {\n      \"title\": \"RAG Quality Playbook\",\n      \"thesis\": \"Systematic steps to boost retrieval-augmented generation accuracy.\",\n      \"why_now\": \"Growing searches for “training data” and “generative ai”.\",\n      \"audience\": \"Data teams and product managers\",\n      \"goal\": \"Achieve save rate >5% and 2 partner inquiries\",\n      \"key_messages\": [\n        \"Index quality beats size\",\n        \"Eval sets catch regressions\",\n        \"Guardrails cut hallucinations\"\n      ],\n      \"outline\": [\n        \"Choose chunking/embeddings\",\n        \"Freshness and reindex policy\",\n        \"Evals: retrieval + answer\",\n        \"Fallbacks and guardrails\",\n        \"Monitoring in production\"\n      ],\n      \"seo\": {\n        \"primary\": \"rag evaluation\",\n        \"secondary\": [\"retrieval quality\", \"hallucination guardrails\"]\n      },\n      \"tone\": \"Clear, measured, actionable; avoid overstated claims.\",\n      \"cta\": \"Download the eval checklist\"\n    },\n  ]\n}\n\n#language\nif the content of BRAND_CONFIG is chinese you should use chinese to generate  chinese ideas"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        16,
+        1344
+      ],
+      "id": "de23da20-01ee-4590-a9eb-837726d9d8a7",
+      "name": "Basic LLM Chain4",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n  {\n    \"output\": {\n      \"ideas\": [\n        {\n          \"title\": \"High-Throughput Tips\",\n          \"thesis\": \"Learn how to streamline academic research using high-throughput data methods without sacrificing rigor.\",\n          \"why_now\": \"Rising searches for 'high-throughput meaning' and sustained top queries for 'scholar' and 'google scholar' indicate researchers seek efficient workflows.\",\n          \"audience\": \"Academic researchers and grad students\",\n          \"goal\": \"Drive 15+ newsletter signups and 5% CTR on resource download\",\n          \"key_messages\": [\n            \"Use automated citation tools to reduce manual work\",\n            \"Filter results with precise Boolean operators\",\n            \"Batch-download papers via Google Scholar APIs\"\n          ],\n          \"outline\": [\n            \"Why high-throughput matters in academia\",\n            \"Tools to automate literature review\",\n            \"How to structure search queries for precision\",\n            \"Avoiding information overload with filters\"\n          ],\n          \"seo\": {\n            \"primary\": \"high-throughput meaning\",\n            \"secondary\": [\n              \"google scholar tips\",\n              \"academic research efficiency\"\n            ]\n          },\n          \"tone\": \"Calm, authoritative, and subtly educational—no hype, no jargon overload.\",\n          \"cta\": \"Download the scholar workflow checklist\"\n        },\n        {\n          \"title\": \"Scholar Workflow\",\n          \"thesis\": \"Maximize scholarly output by systematizing literature intake and annotation using high-throughput techniques.\",\n          \"why_now\": \"Top queries confirm strong interest in 'scholar' and 'high-throughput meaning'—researchers want scalable methods.\",\n          \"audience\": \"Early-career academics and postdocs\",\n          \"goal\": \"Generate 20 qualified leads for a free productivity audit\",\n          \"key_messages\": [\n            \"Automate PDF tagging with metadata tools\",\n            \"Create reusable search templates for recurring topics\",\n            \"Sync annotations across devices using cloud libraries\"\n          ],\n          \"outline\": [\n            \"The bottleneck: manual paper triage\",\n            \"Build your personal high-throughput pipeline\",\n            \"Integrate Zotero, Notion, and Google Scholar\",\n            \"Track progress with weekly metrics\"\n          ],\n          \"seo\": {\n            \"primary\": \"google scholar\",\n            \"secondary\": [\n              \"research workflow\",\n              \"academic productivity\"\n            ]\n          },\n          \"tone\": \"Practical, quiet confidence—focus on systems, not shortcuts.\",\n          \"cta\": \"Get the template bundle\"\n        }\n      ]\n    }\n  }\n]",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        1568
+      ],
+      "id": "1f63604b-74c4-4ec7-8d1b-389d4ddd51bf",
+      "name": "Structured Output Parser3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+          "mode": "list",
+          "cachedResultName": "Qwen/Qwen3-30B-A3B-Instruct-2507"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        736
+      ],
+      "id": "1a76a69f-c2a3-4277-85d1-7040e56e1953",
+      "name": "硅基流动",
+      "credentials": {
+        "openAiApi": {
+          "id": "9kbp9E0YqRa7G5Km",
+          "name": "硅基流动"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+          "mode": "list",
+          "cachedResultName": "Qwen/Qwen3-30B-A3B-Instruct-2507"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        896
+      ],
+      "id": "a4e1554f-c809-482c-bf9c-cc43484abd9e",
+      "name": "硅基流动1",
+      "credentials": {
+        "openAiApi": {
+          "id": "9kbp9E0YqRa7G5Km",
+          "name": "硅基流动"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+          "mode": "list",
+          "cachedResultName": "Qwen/Qwen3-30B-A3B-Instruct-2507"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        48,
+        272
+      ],
+      "id": "d071dbe3-b7db-4320-95b0-487f0e3968fb",
+      "name": "硅基流动2",
+      "credentials": {
+        "openAiApi": {
+          "id": "9kbp9E0YqRa7G5Km",
+          "name": "硅基流动"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+          "mode": "list",
+          "cachedResultName": "Qwen/Qwen3-30B-A3B-Instruct-2507"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        352
+      ],
+      "id": "ae7000b3-1478-45ca-84b0-4f141853b42a",
+      "name": "硅基流动3",
+      "credentials": {
+        "openAiApi": {
+          "id": "9kbp9E0YqRa7G5Km",
+          "name": "硅基流动"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+          "mode": "list",
+          "cachedResultName": "Qwen/Qwen3-30B-A3B-Instruct-2507"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -976,
+        992
+      ],
+      "id": "59c93e69-0ae5-4c50-9e98-aba3f612678d",
+      "name": "硅基流动4",
+      "credentials": {
+        "openAiApi": {
+          "id": "9kbp9E0YqRa7G5Km",
+          "name": "硅基流动"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+          "mode": "list",
+          "cachedResultName": "Qwen/Qwen3-30B-A3B-Instruct-2507"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -816,
+        1136
+      ],
+      "id": "4a123c9b-97cd-4138-ae68-f4f458f7e651",
+      "name": "硅基流动5",
+      "credentials": {
+        "openAiApi": {
+          "id": "9kbp9E0YqRa7G5Km",
+          "name": "硅基流动"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+          "mode": "list",
+          "cachedResultName": "Qwen/Qwen3-30B-A3B-Instruct-2507"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -64,
+        1568
+      ],
+      "id": "456378aa-cd5e-4013-a601-280485f8fc2b",
+      "name": "硅基流动6",
+      "credentials": {
+        "openAiApi": {
+          "id": "9kbp9E0YqRa7G5Km",
+          "name": "硅基流动"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+          "mode": "list",
+          "cachedResultName": "Qwen/Qwen3-30B-A3B-Instruct-2507"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        1840
+      ],
+      "id": "eb1f592d-8690-479f-bc72-35b0d8e56247",
+      "name": "硅基流动7",
+      "credentials": {
+        "openAiApi": {
+          "id": "9kbp9E0YqRa7G5Km",
+          "name": "硅基流动"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "115.190.109.17:5678",
+            "connection": "keep-alive",
+            "content-length": "3906",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0",
+            "content-type": "application/json",
+            "accept": "*/*",
+            "origin": "http://115.190.109.17:3000",
+            "referer": "http://115.190.109.17:3000/",
+            "accept-encoding": "gzip, deflate",
+            "accept-language": "zh-CN,zh;q=0.9"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "brand_basic": {
+              "name": "Illumina",
+              "company": "Illumina, Inc.",
+              "website": "https://www.illumina.com/",
+              "tagline": "Improving human health by unlocking the power of the genome",
+              "businesses": [
+                "Sequencing instruments and consumables (NovaSeq, NextSeq, MiSeq/iSeq; flow cells, reagents)",
+                "Array-based genotyping systems (iScan)",
+                "Bioinformatics platforms (DRAGEN secondary analysis, BaseSpace Sequence Hub, Illumina Connected Analytics)",
+                "Clinical and translational genomics solutions (e.g., TruSight Oncology portfolio)",
+                "Global services, training, service plans and technical support"
+              ],
+              "products": [
+                {
+                  "name": "NovaSeq X Series",
+                  "purpose": "Flagship high-throughput NGS platform for population-scale, oncology and large multi-omics projects",
+                  "audience": [
+                    "Large academic centers",
+                    "Population genomics programs",
+                    "CROs",
+                    "Biopharma"
+                  ]
+                },
+                {
+                  "name": "NextSeq 1000/2000",
+                  "purpose": "Mid-throughput sequencers balancing run cost and turnaround for labs scaling from pilot to production",
+                  "audience": [
+                    "Core facilities",
+                    "Clinical labs",
+                    "Biotech R&D groups"
+                  ]
+                },
+                {
+                  "name": "MiSeq / iSeq 100",
+                  "purpose": "Benchtop, low-throughput systems for targeted panels, microbial genomics and method development",
+                  "audience": [
+                    "Small labs",
+                    "Teaching labs",
+                    "Applied markets (food safety, forensics, vet)"
+                  ]
+                },
+                {
+                  "name": "DRAGEN Secondary Analysis",
+                  "purpose": "Optimized pipelines for ultra-fast, accurate secondary analysis (germline, somatic, RNA, methylation, etc.) available on-prem, cloud or on-instrument",
+                  "audience": [
+                    "Bioinformatics teams",
+                    "Clinical labs needing validated pipelines",
+                    "Population genomics"
+                  ]
+                },
+                {
+                  "name": "BaseSpace Sequence Hub",
+                  "purpose": "Cloud platform for run management, analysis apps, storage and collaboration integrated with Illumina instruments",
+                  "audience": [
+                    "Labs wanting managed pipelines",
+                    "Distributed teams",
+                    "SMB genomics"
+                  ]
+                }
+              ]
+            },
+            "brand_tone": {
+              "keywords": [
+                "Scientific rigor",
+                "Data-driven",
+                "Regulated environments",
+                "Reproducibility",
+                "Operational reliability"
+              ],
+              "writing_style": {
+                "voice": "Precise, technical, claims backed by metrics (yield, Q30, error models, runtime, TCO).",
+                "do": [
+                  "Show concrete benchmarks (reads, Q30 %, cost per Gb, runtime vs. baseline).",
+                  "Map features to regulated use-cases (validation, reproducibility, audit trails).",
+                  "Include workflow diagrams and step-by-step SOP-style instructions.",
+                  "Reference peer-reviewed sources or official documentation where claims are made."
+                ],
+                "dont": [
+                  "Do not make clinical claims or diagnostic performance statements without citations.",
+                  "Avoid competitor-bashing and unverifiable superlatives.",
+                  "Do not blur research-use-only vs. IVD/regulated claims."
+                ]
+              }
+            },
+            "audience_personas": [
+              {
+                "name": "Academic Genomics Cores",
+                "goals": [
+                  "Maximize throughput and utilization",
+                  "Lower cost per Gb",
+                  "Offer standardized pipelines to PIs"
+                ],
+                "pain_points": [
+                  "Instrument scheduling bottlenecks",
+                  "Heterogeneous data quality",
+                  "Bioinformatics staffing"
+                ],
+                "care_about": [
+                  "Throughput/Q30",
+                  "Run-to-run consistency",
+                  "Automated analysis at scale"
+                ]
+              },
+              {
+                "name": "Clinical & Translational Labs",
+                "goals": [
+                  "Validated panels with consistent turnaround",
+                  "Traceable pipelines",
+                  "Quality management integration"
+                ],
+                "pain_points": [
+                  "Regulatory documentation burden",
+                  "Pipeline drift",
+                  "Sample tracking & chain-of-custody"
+                ],
+                "care_about": [
+                  "Reproducibility",
+                  "Auditability",
+                  "Vendor support/SLA"
+                ]
+              },
+              {
+                "name": "Biopharma R&D",
+                "goals": [
+                  "Scalable sequencing for target discovery and biomarkers",
+                  "Interoperable data lakes",
+                  "Faster cycle times"
+                ],
+                "pain_points": [
+                  "Compute costs",
+                  "Cross-site standardization",
+                  "Cloud/on-prem policy constraints"
+                ],
+                "care_about": [
+                  "Deployment flexibility (on-instrument/on-prem/cloud)",
+                  "API/automation",
+                  "Total cost of ownership"
+                ]
+              },
+              {
+                "name": "Applied Genomics (AgBio, Micro, Forensics)",
+                "goals": [
+                  "Robust targeted workflows",
+                  "Simple SOPs for non-specialists",
+                  "Predictable costs"
+                ],
+                "pain_points": [
+                  "Method transfer pain",
+                  "Small teams",
+                  "Compliance requirements"
+                ],
+                "care_about": [
+                  "Ease of use",
+                  "Validated kits/panels",
+                  "Support & training"
+                ]
+              }
+            ]
+          },
+          "webhookUrl": "http://115.190.109.17:5678/webhook/set",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Trends1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Google Trends3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Trends2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Trends1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Trends2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Trends3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain3",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain4",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "硅基流动": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "硅基流动1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "硅基流动2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "硅基流动3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "硅基流动4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "硅基流动5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "硅基流动6": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "硅基流动7": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bf84a94f-ae2a-4aaf-a26f-3abd61e640b5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "87fe02579b858b6bc4d89b18acd03f799c7636de311824db66bbc9207f92d9c4"
+  },
+  "id": "v6Ke8Xwr20KwJGaI",
+  "tags": []
+}
