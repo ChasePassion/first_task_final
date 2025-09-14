@@ -1,0 +1,52 @@
+version: "3.9"
+name: ${PROJECT_NAME}
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ${PROJECT_NAME}-frontend
+    environment:
+      TZ: ${TZ}
+      NEXT_PUBLIC_N8N_BASE: ${NEXT_PUBLIC_N8N_BASE}
+      NODE_ENV: production
+    ports:
+      - "${PORT_FRONTEND}:3000"
+    depends_on:
+      - n8n
+    restart: unless-stopped
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: ${PROJECT_NAME}-n8n
+    environment:
+      TZ: ${TZ}
+      GENERIC_TIMEZONE: ${GENERIC_TIMEZONE}
+      N8N_RUNNERS_ENABLED: ${N8N_RUNNERS_ENABLED}
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: ${N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS}
+      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE}
+      N8N_PROTOCOL: ${N8N_PROTOCOL}
+      N8N_HOST: ${N8N_HOST}
+      # WEBHOOK_URL: ${WEBHOOK_URL}
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - n8n_local_files:/files
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:5678/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  n8n_data:
+  n8n_local_files:
